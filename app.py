@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# BANCO DE DADOS TEMPORÁRIO
+# BANCO DE DADOS
 # ============================================================
 
 if "turmas" not in st.session_state:
@@ -56,11 +56,13 @@ def calcular_faltas(aluno, turma, disciplina=None):
     faltas = 0
 
     for chamada in st.session_state.chamadas:
+
         if (
             chamada["aluno"] == aluno
             and chamada["turma"] == turma
             and chamada["presenca"] == "Falta"
         ):
+
             if disciplina is None or chamada["disciplina"] == disciplina:
                 faltas += 1
 
@@ -71,10 +73,12 @@ def calcular_aulas(aluno, turma, disciplina=None):
     total = 0
 
     for chamada in st.session_state.chamadas:
+
         if (
             chamada["aluno"] == aluno
             and chamada["turma"] == turma
         ):
+
             if disciplina is None or chamada["disciplina"] == disciplina:
                 total += 1
 
@@ -82,15 +86,28 @@ def calcular_aulas(aluno, turma, disciplina=None):
 
 
 def calcular_frequencia(aluno, turma, disciplina=None):
-    total = calcular_aulas(aluno, turma, disciplina)
-    faltas = calcular_faltas(aluno, turma, disciplina)
+
+    total = calcular_aulas(
+        aluno,
+        turma,
+        disciplina
+    )
+
+    faltas = calcular_faltas(
+        aluno,
+        turma,
+        disciplina
+    )
 
     if total == 0:
         return 100.0
 
     presentes = total - faltas
 
-    return round((presentes / total) * 100, 2)
+    return round(
+        (presentes / total) * 100,
+        2
+    )
 
 
 # ============================================================
@@ -98,11 +115,14 @@ def calcular_frequencia(aluno, turma, disciplina=None):
 # ============================================================
 
 st.title("🏫 SISTEMA DE GESTÃO ESCOLAR - 2027")
-st.markdown("### Cadastro de professores, alunos, notas e chamada")
+
+st.markdown(
+    "### Cadastro de professores, alunos, notas e frequência"
+)
 
 
 # ============================================================
-# MENU
+# ABAS
 # ============================================================
 
 abas = st.tabs([
@@ -128,12 +148,18 @@ with abas[0]:
 
     with col1:
 
+        st.subheader("➕ Nova turma")
+
         nome_turma = st.text_input(
             "Nome da turma",
+            placeholder="Ex.: 1º Ano A",
             key="nova_turma"
         )
 
-        if st.button("Cadastrar Turma"):
+        if st.button(
+            "Cadastrar Turma",
+            key="btn_cadastrar_turma"
+        ):
 
             if nome_turma.strip() == "":
                 st.warning("Digite o nome da turma.")
@@ -142,33 +168,61 @@ with abas[0]:
                 st.warning("Essa turma já existe.")
 
             else:
-                st.session_state.turmas.append(nome_turma)
-                st.success("Turma cadastrada!")
+
+                st.session_state.turmas.append(
+                    nome_turma
+                )
+
+                st.success(
+                    "Turma cadastrada com sucesso!"
+                )
+
                 st.rerun()
 
     with col2:
 
+        st.subheader("🗑️ Excluir turma")
+
         if st.session_state.turmas:
 
             turma_excluir = st.selectbox(
-                "Excluir turma",
+                "Selecione a turma",
                 st.session_state.turmas,
                 key="excluir_turma"
             )
 
-            if st.button("Excluir Turma"):
+            if st.button(
+                "Excluir Turma",
+                key="btn_excluir_turma"
+            ):
 
-                st.session_state.turmas.remove(turma_excluir)
+                st.session_state.turmas.remove(
+                    turma_excluir
+                )
 
                 st.session_state.alunos = [
-                    a for a in st.session_state.alunos
-                    if a["turma"] != turma_excluir
+                    aluno
+                    for aluno in st.session_state.alunos
+                    if aluno["turma"] != turma_excluir
                 ]
 
-                st.success("Turma excluída!")
+                st.success(
+                    "Turma excluída!"
+                )
+
                 st.rerun()
 
+        else:
+
+            st.info(
+                "Nenhuma turma cadastrada."
+            )
+
     st.divider()
+
+    # --------------------------------------------------------
+    # DISCIPLINAS
+    # --------------------------------------------------------
 
     st.header("📚 Cadastro de Disciplinas")
 
@@ -176,60 +230,106 @@ with abas[0]:
 
     with col1:
 
+        st.subheader("➕ Nova disciplina")
+
         nome_disciplina = st.text_input(
             "Nome da disciplina",
+            placeholder="Ex.: Física",
             key="nova_disciplina"
         )
 
-        if st.button("Cadastrar Disciplina"):
+        if st.button(
+            "Cadastrar Disciplina",
+            key="btn_cadastrar_disciplina"
+        ):
 
             if nome_disciplina.strip() == "":
-                st.warning("Digite o nome da disciplina.")
+                st.warning(
+                    "Digite o nome da disciplina."
+                )
 
             elif nome_disciplina in st.session_state.disciplinas:
-                st.warning("Essa disciplina já existe.")
+
+                st.warning(
+                    "Essa disciplina já existe."
+                )
 
             else:
-                st.session_state.disciplinas.append(nome_disciplina)
-                st.success("Disciplina cadastrada!")
+
+                st.session_state.disciplinas.append(
+                    nome_disciplina
+                )
+
+                st.success(
+                    "Disciplina cadastrada!"
+                )
+
                 st.rerun()
 
     with col2:
 
+        st.subheader("🗑️ Excluir disciplina")
+
         if st.session_state.disciplinas:
 
             disciplina_excluir = st.selectbox(
-                "Excluir disciplina",
+                "Selecione a disciplina",
                 st.session_state.disciplinas,
                 key="excluir_disciplina"
             )
 
-            if st.button("Excluir Disciplina"):
+            if st.button(
+                "Excluir Disciplina",
+                key="btn_excluir_disciplina"
+            ):
 
                 st.session_state.disciplinas.remove(
                     disciplina_excluir
                 )
 
-                st.success("Disciplina excluída!")
+                st.success(
+                    "Disciplina excluída!"
+                )
+
                 st.rerun()
+
+        else:
+
+            st.info(
+                "Nenhuma disciplina cadastrada."
+            )
 
     st.divider()
 
-    st.subheader("Turmas cadastradas")
+    st.subheader("📋 Turmas cadastradas")
 
     if st.session_state.turmas:
-        for turma in st.session_state.turmas:
-            st.write("•", turma)
-    else:
-        st.info("Nenhuma turma cadastrada.")
 
-    st.subheader("Disciplinas cadastradas")
+        for turma in st.session_state.turmas:
+            st.write(
+                f"🏫 {turma}"
+            )
+
+    else:
+
+        st.info(
+            "Nenhuma turma cadastrada."
+        )
+
+    st.subheader("📚 Disciplinas cadastradas")
 
     if st.session_state.disciplinas:
+
         for disciplina in st.session_state.disciplinas:
-            st.write("•", disciplina)
+            st.write(
+                f"📚 {disciplina}"
+            )
+
     else:
-        st.info("Nenhuma disciplina cadastrada.")
+
+        st.info(
+            "Nenhuma disciplina cadastrada."
+        )
 
 
 # ============================================================
@@ -240,52 +340,72 @@ with abas[1]:
 
     st.header("👨‍🏫 Cadastro de Professores")
 
+    st.success(
+        "O professor é cadastrado automaticamente como ATIVO. "
+        "Não é necessário aprovação."
+    )
+
     if not st.session_state.disciplinas:
+
         st.warning(
-            "Cadastre pelo menos uma disciplina antes de cadastrar professores."
+            "Cadastre pelo menos uma disciplina primeiro."
         )
 
     else:
 
         nome_professor = st.text_input(
-            "Nome do professor",
+            "Nome completo do professor",
+            placeholder="Digite o nome do professor",
             key="nome_professor"
         )
 
         disciplinas_professor = st.multiselect(
-            "Disciplinas do professor",
+            "Disciplinas que o professor leciona",
             st.session_state.disciplinas,
             key="disciplinas_professor"
         )
 
-        if st.button("Cadastrar Professor"):
+        if st.button(
+            "➕ Cadastrar Professor",
+            key="btn_cadastrar_professor"
+        ):
 
             if nome_professor.strip() == "":
-                st.warning("Digite o nome do professor.")
+
+                st.warning(
+                    "Digite o nome do professor."
+                )
 
             elif not disciplinas_professor:
-                st.warning("Selecione pelo menos uma disciplina.")
+
+                st.warning(
+                    "Selecione pelo menos uma disciplina."
+                )
 
             else:
 
                 existe = any(
-                    p["nome"] == nome_professor
+                    p["nome"].lower() == nome_professor.lower()
                     for p in st.session_state.professores
                 )
 
                 if existe:
-                    st.warning("Professor já cadastrado.")
+
+                    st.warning(
+                        "Esse professor já está cadastrado."
+                    )
 
                 else:
 
                     st.session_state.professores.append({
                         "nome": nome_professor,
                         "disciplinas": disciplinas_professor,
-                        "status": "Pendente"
+                        "status": "Ativo"
                     })
 
                     st.success(
-                        "Professor cadastrado e aguardando aprovação."
+                        "Professor cadastrado com sucesso! "
+                        "Ele já está ativo."
                     )
 
                     st.rerun()
@@ -296,7 +416,9 @@ with abas[1]:
 
     if not st.session_state.professores:
 
-        st.info("Nenhum professor cadastrado.")
+        st.info(
+            "Nenhum professor cadastrado."
+        )
 
     else:
 
@@ -304,62 +426,39 @@ with abas[1]:
             st.session_state.professores
         ):
 
-            with st.container():
+            st.container()
 
-                st.write(
-                    f"### 👨‍🏫 {professor['nome']}"
+            st.subheader(
+                f"👨‍🏫 {professor['nome']}"
+            )
+
+            st.write(
+                "**Disciplinas:** "
+                + ", ".join(
+                    professor["disciplinas"]
+                )
+            )
+
+            st.success(
+                "🟢 Professor Ativo"
+            )
+
+            if st.button(
+                "🗑️ Excluir Professor",
+                key=f"excluir_professor_{i}"
+            ):
+
+                nome_excluido = professor["nome"]
+
+                st.session_state.professores.pop(i)
+
+                st.success(
+                    f"Professor {nome_excluido} excluído."
                 )
 
-                st.write(
-                    "**Disciplinas:** "
-                    + ", ".join(professor["disciplinas"])
-                )
+                st.rerun()
 
-                st.write(
-                    f"**Status:** {professor['status']}"
-                )
-
-                col1, col2 = st.columns(2)
-
-                with col1:
-
-                    if professor["status"] == "Pendente":
-
-                        if st.button(
-                            "✅ Aprovar Professor",
-                            key=f"aprovar_{i}"
-                        ):
-
-                            st.session_state.professores[i][
-                                "status"
-                            ] = "Aprovado"
-
-                            st.success(
-                                "Professor aprovado!"
-                            )
-
-                            st.rerun()
-
-                    else:
-
-                        st.success("Professor aprovado.")
-
-                with col2:
-
-                    if st.button(
-                        "🗑️ Excluir Professor",
-                        key=f"excluir_professor_{i}"
-                    ):
-
-                        st.session_state.professores.pop(i)
-
-                        st.success(
-                            "Professor excluído."
-                        )
-
-                        st.rerun()
-
-                st.divider()
+            st.divider()
 
 
 # ============================================================
@@ -370,32 +469,58 @@ with abas[2]:
 
     st.header("👨‍🎓 Cadastro de Alunos")
 
+    st.info(
+        "Nesta área você pode cadastrar, visualizar e excluir alunos."
+    )
+
+    # --------------------------------------------------------
+    # CADASTRO DO ALUNO
+    # --------------------------------------------------------
+
+    st.subheader("➕ Cadastrar novo aluno")
+
     if not st.session_state.turmas:
 
-        st.warning("Cadastre uma turma primeiro.")
+        st.warning(
+            "Antes de cadastrar um aluno, cadastre uma turma "
+            "na aba 'Turmas e Disciplinas'."
+        )
 
     else:
 
-        nome_aluno = st.text_input(
-            "Nome completo do aluno",
-            key="nome_aluno"
-        )
+        col1, col2 = st.columns(2)
 
-        turma_aluno = st.selectbox(
-            "Turma",
-            st.session_state.turmas,
-            key="turma_aluno"
-        )
+        with col1:
 
-        if st.button("Cadastrar Aluno"):
+            nome_aluno = st.text_input(
+                "Nome completo do aluno",
+                placeholder="Digite o nome do aluno",
+                key="nome_aluno"
+            )
+
+        with col2:
+
+            turma_aluno = st.selectbox(
+                "Selecione a turma",
+                st.session_state.turmas,
+                key="turma_aluno"
+            )
+
+        if st.button(
+            "➕ Cadastrar Aluno",
+            key="btn_cadastrar_aluno"
+        ):
 
             if nome_aluno.strip() == "":
-                st.warning("Digite o nome do aluno.")
+
+                st.warning(
+                    "Digite o nome do aluno."
+                )
 
             else:
 
                 existe = any(
-                    a["nome"] == nome_aluno
+                    a["nome"].lower() == nome_aluno.lower()
                     and a["turma"] == turma_aluno
                     for a in st.session_state.alunos
                 )
@@ -414,70 +539,100 @@ with abas[2]:
                     })
 
                     st.success(
-                        "Aluno cadastrado!"
+                        f"Aluno {nome_aluno} cadastrado com sucesso!"
                     )
 
                     st.rerun()
 
     st.divider()
 
+    # --------------------------------------------------------
+    # LISTA DE ALUNOS
+    # --------------------------------------------------------
+
     st.header("📋 Alunos cadastrados")
 
     if not st.session_state.alunos:
 
-        st.info("Nenhum aluno cadastrado.")
+        st.info(
+            "Nenhum aluno cadastrado ainda."
+        )
 
     else:
 
-        for i, aluno in enumerate(
-            st.session_state.alunos
+        dados_alunos = []
+
+        for aluno in st.session_state.alunos:
+
+            dados_alunos.append({
+                "Aluno": aluno["nome"],
+                "Turma": aluno["turma"]
+            })
+
+        st.dataframe(
+            pd.DataFrame(dados_alunos),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.subheader("🗑️ Excluir aluno")
+
+        aluno_excluir = st.selectbox(
+            "Selecione o aluno que deseja excluir",
+            [
+                f"{a['nome']} — {a['turma']}"
+                for a in st.session_state.alunos
+            ],
+            key="aluno_excluir"
+        )
+
+        if st.button(
+            "🗑️ Excluir Aluno",
+            key="btn_excluir_aluno"
         ):
 
-            col1, col2, col3 = st.columns([4, 3, 1])
-
-            with col1:
-                st.write(
-                    f"👨‍🎓 **{aluno['nome']}**"
+            nome_excluir, turma_excluir = (
+                aluno_excluir.split(
+                    " — ",
+                    1
                 )
+            )
 
-            with col2:
-                st.write(
-                    f"Turma: **{aluno['turma']}**"
+            # Exclui o aluno
+            st.session_state.alunos = [
+                aluno
+                for aluno in st.session_state.alunos
+                if not (
+                    aluno["nome"] == nome_excluir
+                    and aluno["turma"] == turma_excluir
                 )
+            ]
 
-            with col3:
+            # Exclui as notas do aluno
+            st.session_state.notas = [
+                nota
+                for nota in st.session_state.notas
+                if not (
+                    nota["aluno"] == nome_excluir
+                    and nota["turma"] == turma_excluir
+                )
+            ]
 
-                if st.button(
-                    "🗑️",
-                    key=f"excluir_aluno_{i}"
-                ):
+            # Exclui as chamadas do aluno
+            st.session_state.chamadas = [
+                chamada
+                for chamada in st.session_state.chamadas
+                if not (
+                    chamada["aluno"] == nome_excluir
+                    and chamada["turma"] == turma_excluir
+                )
+            ]
 
-                    nome_excluido = aluno["nome"]
-                    turma_excluida = aluno["turma"]
+            st.success(
+                f"Aluno {nome_excluir} excluído com sucesso!"
+            )
 
-                    st.session_state.alunos.pop(i)
-
-                    st.session_state.notas = [
-                        n for n in st.session_state.notas
-                        if not (
-                            n["aluno"] == nome_excluido
-                            and n["turma"] == turma_excluida
-                        )
-                    ]
-
-                    st.session_state.chamadas = [
-                        c for c in st.session_state.chamadas
-                        if not (
-                            c["aluno"] == nome_excluido
-                            and c["turma"] == turma_excluida
-                        )
-                    ]
-
-                    st.success(
-                        "Aluno excluído!"
-                    )
-
-                    st.rerun()
+            st.rerun()
 
 
 # ============================================================
@@ -505,15 +660,17 @@ with abas[3]:
         aluno_selecionado = st.selectbox(
             "Aluno",
             [
-                f"{a['nome']} - {a['turma']}"
+                f"{a['nome']} — {a['turma']}"
                 for a in st.session_state.alunos
             ],
             key="aluno_notas"
         )
 
-        aluno_nome, turma_nome = aluno_selecionado.split(
-            " - ",
-            1
+        aluno_nome, turma_nome = (
+            aluno_selecionado.split(
+                " — ",
+                1
+            )
         )
 
         disciplina_selecionada = st.selectbox(
@@ -558,46 +715,54 @@ with abas[3]:
             else 0.0
         )
 
+        st.subheader(
+            "📚 Digite as quatro médias"
+        )
+
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
+
             n1 = st.number_input(
                 "1ª Média",
                 min_value=0.0,
                 max_value=10.0,
                 value=float(valor_n1),
                 step=0.1,
-                key="n1"
+                key=f"nota1_{aluno_nome}_{disciplina_selecionada}"
             )
 
         with col2:
+
             n2 = st.number_input(
                 "2ª Média",
                 min_value=0.0,
                 max_value=10.0,
                 value=float(valor_n2),
                 step=0.1,
-                key="n2"
+                key=f"nota2_{aluno_nome}_{disciplina_selecionada}"
             )
 
         with col3:
+
             n3 = st.number_input(
                 "3ª Média",
                 min_value=0.0,
                 max_value=10.0,
                 value=float(valor_n3),
                 step=0.1,
-                key="n3"
+                key=f"nota3_{aluno_nome}_{disciplina_selecionada}"
             )
 
         with col4:
+
             n4 = st.number_input(
                 "4ª Média",
                 min_value=0.0,
                 max_value=10.0,
                 value=float(valor_n4),
                 step=0.1,
-                key="n4"
+                key=f"nota4_{aluno_nome}_{disciplina_selecionada}"
             )
 
         media = calcular_media(
@@ -607,7 +772,9 @@ with abas[3]:
             n4
         )
 
-        resultado = situacao(media)
+        resultado = situacao(
+            media
+        )
 
         st.divider()
 
@@ -616,19 +783,38 @@ with abas[3]:
         with col1:
 
             st.metric(
-                "Média Final",
+                "📊 Média Final",
                 f"{media:.2f}"
             )
 
         with col2:
 
             st.metric(
-                "Situação",
+                "📋 Situação",
                 resultado
             )
 
+        if media >= 7:
+
+            st.success(
+                "✅ Aluno aprovado."
+            )
+
+        elif media >= 4:
+
+            st.warning(
+                "⚠️ Aluno em recuperação."
+            )
+
+        else:
+
+            st.error(
+                "❌ Aluno reprovado."
+            )
+
         if st.button(
-            "💾 Salvar Notas"
+            "💾 Salvar Notas",
+            key="btn_salvar_notas"
         ):
 
             novo_registro = {
@@ -656,9 +842,11 @@ with abas[3]:
                 ):
 
                     st.session_state.notas[i] = novo_registro
+
                     encontrou = True
 
             if not encontrou:
+
                 st.session_state.notas.append(
                     novo_registro
                 )
@@ -676,7 +864,7 @@ with abas[3]:
 
 with abas[4]:
 
-    st.header("📅 Chamada Escolar - 2027")
+    st.header("📅 CHAMADA ESCOLAR - 2027")
 
     if not st.session_state.alunos:
 
@@ -690,85 +878,113 @@ with abas[4]:
             "Cadastre disciplinas primeiro."
         )
 
+    elif not st.session_state.turmas:
+
+        st.warning(
+            "Cadastre turmas primeiro."
+        )
+
     else:
 
-        data_chamada = st.date_input(
-            "Data da aula",
-            value=date(2027, 1, 1),
-            min_value=date(2027, 1, 1),
-            max_value=date(2027, 12, 31)
-        )
+        col1, col2, col3 = st.columns(3)
 
-        disciplina_chamada = st.selectbox(
-            "Disciplina",
-            st.session_state.disciplinas,
-            key="disciplina_chamada"
-        )
+        with col1:
 
-        turma_chamada = st.selectbox(
-            "Turma",
-            st.session_state.turmas,
-            key="turma_chamada"
-        )
+            data_chamada = st.date_input(
+                "Data da aula",
+                value=date(2027, 1, 1),
+                min_value=date(2027, 1, 1),
+                max_value=date(2027, 12, 31),
+                key="data_chamada"
+            )
+
+        with col2:
+
+            turma_chamada = st.selectbox(
+                "Turma",
+                st.session_state.turmas,
+                key="turma_chamada"
+            )
+
+        with col3:
+
+            disciplina_chamada = st.selectbox(
+                "Disciplina",
+                st.session_state.disciplinas,
+                key="disciplina_chamada"
+            )
+
+        st.divider()
 
         alunos_turma = [
-            a["nome"]
-            for a in st.session_state.alunos
-            if a["turma"] == turma_chamada
+            aluno["nome"]
+            for aluno in st.session_state.alunos
+            if aluno["turma"] == turma_chamada
         ]
 
-        st.subheader(
-            f"Chamada - {turma_chamada}"
-        )
+        if not alunos_turma:
 
-        presencas = {}
-
-        for aluno in alunos_turma:
-
-            presencas[aluno] = st.radio(
-                aluno,
-                [
-                    "Presente",
-                    "Falta"
-                ],
-                horizontal=True,
-                key=f"presenca_{aluno}_{data_chamada}_{disciplina_chamada}"
+            st.warning(
+                "Não existem alunos cadastrados nessa turma."
             )
 
-        if st.button(
-            "💾 Salvar Chamada"
-        ):
+        else:
 
-            for aluno, presenca in presencas.items():
-
-                st.session_state.chamadas = [
-                    c for c in st.session_state.chamadas
-                    if not (
-                        c["aluno"] == aluno
-                        and c["turma"] == turma_chamada
-                        and c["disciplina"] == disciplina_chamada
-                        and c["data"] == str(data_chamada)
-                    )
-                ]
-
-                st.session_state.chamadas.append({
-                    "aluno": aluno,
-                    "turma": turma_chamada,
-                    "disciplina": disciplina_chamada,
-                    "data": str(data_chamada),
-                    "presenca": presenca
-                })
-
-            st.success(
-                "Chamada salva!"
+            st.subheader(
+                f"📋 Chamada — {turma_chamada}"
             )
 
-            st.rerun()
+            presencas = {}
+
+            for aluno in alunos_turma:
+
+                presencas[aluno] = st.radio(
+                    f"**{aluno}**",
+                    [
+                        "Presente",
+                        "Falta"
+                    ],
+                    horizontal=True,
+                    key=f"presenca_{aluno}_{data_chamada}_{disciplina_chamada}"
+                )
+
+            if st.button(
+                "💾 Salvar Chamada",
+                key="btn_salvar_chamada"
+            ):
+
+                for aluno, presenca in presencas.items():
+
+                    # Evita duplicar a chamada
+                    st.session_state.chamadas = [
+                        chamada
+                        for chamada in st.session_state.chamadas
+                        if not (
+                            chamada["aluno"] == aluno
+                            and chamada["turma"] == turma_chamada
+                            and chamada["disciplina"] == disciplina_chamada
+                            and chamada["data"] == str(data_chamada)
+                        )
+                    ]
+
+                    st.session_state.chamadas.append({
+                        "aluno": aluno,
+                        "turma": turma_chamada,
+                        "disciplina": disciplina_chamada,
+                        "data": str(data_chamada),
+                        "presenca": presenca
+                    })
+
+                st.success(
+                    "Chamada salva com sucesso!"
+                )
+
+                st.rerun()
 
         st.divider()
 
         st.subheader(
-            "📊 Resumo de frequência"
+            "📊 Resumo da frequência"
         )
 
         dados_frequencia = []
@@ -806,7 +1022,8 @@ with abas[4]:
                 pd.DataFrame(
                     dados_frequencia
                 ),
-                use_container_width=True
+                use_container_width=True,
+                hide_index=True
             )
 
 
@@ -816,7 +1033,7 @@ with abas[4]:
 
 with abas[5]:
 
-    st.header("📊 Relatórios")
+    st.header("📊 Relatórios Escolares")
 
     if not st.session_state.alunos:
 
@@ -834,42 +1051,41 @@ with abas[5]:
             turma = aluno["turma"]
 
             registros_aluno = [
-                n for n in st.session_state.notas
+                nota
+                for nota in st.session_state.notas
                 if (
-                    n["aluno"] == nome
-                    and n["turma"] == turma
+                    nota["aluno"] == nome
+                    and nota["turma"] == turma
                 )
             ]
 
-            if registros_aluno:
+            for registro in registros_aluno:
 
-                for registro in registros_aluno:
+                faltas = calcular_faltas(
+                    nome,
+                    turma,
+                    registro["disciplina"]
+                )
 
-                    faltas = calcular_faltas(
-                        nome,
-                        turma,
-                        registro["disciplina"]
-                    )
+                frequencia = calcular_frequencia(
+                    nome,
+                    turma,
+                    registro["disciplina"]
+                )
 
-                    frequencia = calcular_frequencia(
-                        nome,
-                        turma,
-                        registro["disciplina"]
-                    )
-
-                    dados_relatorio.append({
-                        "Aluno": nome,
-                        "Turma": turma,
-                        "Disciplina": registro["disciplina"],
-                        "1ª Média": registro["n1"],
-                        "2ª Média": registro["n2"],
-                        "3ª Média": registro["n3"],
-                        "4ª Média": registro["n4"],
-                        "Média Final": registro["media"],
-                        "Situação": registro["situacao"],
-                        "Faltas": faltas,
-                        "Frequência (%)": frequencia
-                    })
+                dados_relatorio.append({
+                    "Aluno": nome,
+                    "Turma": turma,
+                    "Disciplina": registro["disciplina"],
+                    "1ª Média": registro["n1"],
+                    "2ª Média": registro["n2"],
+                    "3ª Média": registro["n3"],
+                    "4ª Média": registro["n4"],
+                    "Média Final": registro["media"],
+                    "Situação": registro["situacao"],
+                    "Faltas": faltas,
+                    "Frequência (%)": frequencia
+                })
 
         if dados_relatorio:
 
@@ -879,7 +1095,8 @@ with abas[5]:
 
             st.dataframe(
                 df,
-                use_container_width=True
+                use_container_width=True,
+                hide_index=True
             )
 
             csv = df.to_csv(
@@ -908,7 +1125,7 @@ with abas[5]:
         aluno_relatorio = st.selectbox(
             "Selecione o aluno",
             [
-                f"{a['nome']} - {a['turma']}"
+                f"{a['nome']} — {a['turma']}"
                 for a in st.session_state.alunos
             ],
             key="aluno_relatorio"
@@ -916,13 +1133,13 @@ with abas[5]:
 
         nome_relatorio, turma_relatorio = (
             aluno_relatorio.split(
-                " - ",
+                " — ",
                 1
             )
         )
 
         st.subheader(
-            f"Aluno: {nome_relatorio}"
+            f"👨‍🎓 {nome_relatorio}"
         )
 
         st.write(
@@ -930,10 +1147,11 @@ with abas[5]:
         )
 
         registros = [
-            n for n in st.session_state.notas
+            nota
+            for nota in st.session_state.notas
             if (
-                n["aluno"] == nome_relatorio
-                and n["turma"] == turma_relatorio
+                nota["aluno"] == nome_relatorio
+                and nota["turma"] == turma_relatorio
             )
         ]
 
@@ -957,26 +1175,35 @@ with abas[5]:
                     f"### 📚 {registro['disciplina']}"
                 )
 
-                col1, col2, col3 = st.columns(3)
+                col1, col2, col3, col4 = st.columns(4)
 
                 with col1:
-                    st.write(
-                        f"**Média:** {registro['media']:.2f}"
+
+                    st.metric(
+                        "Média",
+                        f"{registro['media']:.2f}"
                     )
 
                 with col2:
-                    st.write(
-                        f"**Situação:** {registro['situacao']}"
+
+                    st.metric(
+                        "Situação",
+                        registro["situacao"]
                     )
 
                 with col3:
-                    st.write(
-                        f"**Faltas:** {faltas}"
+
+                    st.metric(
+                        "Faltas",
+                        faltas
                     )
 
-                st.write(
-                    f"**Frequência:** {frequencia}%"
-                )
+                with col4:
+
+                    st.metric(
+                        "Frequência",
+                        f"{frequencia}%"
+                    )
 
                 st.divider()
 
@@ -995,52 +1222,53 @@ with abas[6]:
 
     st.header("👨‍🏫 Área do Professor")
 
-    professores_aprovados = [
-        p for p in st.session_state.professores
-        if p["status"] == "Aprovado"
+    professores_ativos = [
+        professor
+        for professor in st.session_state.professores
+        if professor["status"] == "Ativo"
     ]
 
-    if not professores_aprovados:
+    if not professores_ativos:
 
         st.warning(
-            "Nenhum professor aprovado."
+            "Nenhum professor cadastrado."
         )
 
     else:
 
         professor_area = st.selectbox(
-            "Professor",
+            "Selecione o professor",
             [
-                p["nome"]
-                for p in professores_aprovados
+                professor["nome"]
+                for professor in professores_ativos
             ],
             key="professor_area"
         )
 
         professor_obj = next(
-            p for p in professores_aprovados
-            if p["nome"] == professor_area
+            professor
+            for professor in professores_ativos
+            if professor["nome"] == professor_area
+        )
+
+        st.success(
+            f"🟢 Professor ativo: {professor_area}"
         )
 
         disciplina_area = st.selectbox(
-            "Disciplina",
+            "Selecione a disciplina",
             professor_obj["disciplinas"],
             key="disciplina_area"
         )
 
-        st.success(
-            f"Professor aprovado: {professor_area}"
-        )
-
         st.info(
-            f"Disciplina selecionada: {disciplina_area}"
+            f"Disciplina: {disciplina_area}"
         )
 
         registros_professor = [
-            n for n in st.session_state.notas
-            if (
-                n["disciplina"] == disciplina_area
-            )
+            nota
+            for nota in st.session_state.notas
+            if nota["disciplina"] == disciplina_area
         ]
 
         if registros_professor:
@@ -1078,7 +1306,8 @@ with abas[6]:
                 pd.DataFrame(
                     dados_professor
                 ),
-                use_container_width=True
+                use_container_width=True,
+                hide_index=True
             )
 
         else:
@@ -1095,8 +1324,7 @@ with abas[6]:
 st.divider()
 
 st.caption(
-    "Sistema Escolar 2027 • Controle de alunos, professores, "
-    "notas e frequência"
+    "🏫 Sistema Escolar 2027 • "
+    "Alunos • Professores • Notas • Frequência • Chamada"
 )
-           
-            
+          
