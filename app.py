@@ -874,70 +874,159 @@ with abas[3]:
 
 
 # ============================================================
-# ABA 5 - CHAMADA 2027
+# :
+
+            # ==========================================
+# LIXEIRA DAS CHAMADAS
+# ==========================================
+
+if "chamadas_lixeira" not in st.session_state:
+    st.session_state.chamadas_lixeira = []
+    # ============================================================
+# 📅 CHAMADA 2027
 # ============================================================
 
-with abas[4]:
+with tab5:
 
-    st.header("📅 CHAMADA ESCOLAR - 2027")
+    st.header("📅 Chamada 2027")
+
+    # ========================================================
+    # FUNÇÃO PARA CALCULAR FALTAS
+    # ========================================================
+
+    def calcular_faltas_chamada(aluno_nome, turma=None, disciplina=None):
+
+        faltas = 0
+
+        for chamada in st.session_state.chamadas:
+
+            if chamada["aluno"] != aluno_nome:
+                continue
+
+            if turma is not None and chamada["turma"] != turma:
+                continue
+
+            if disciplina is not None and chamada["disciplina"] != disciplina:
+                continue
+
+            if chamada["situacao"] == "Falta":
+                faltas += 1
+
+        return faltas
+
+
+    # ========================================================
+    # FUNÇÃO PARA CALCULAR AULAS
+    # ========================================================
+
+    def calcular_aulas_chamada(aluno_nome, turma=None, disciplina=None):
+
+        total = 0
+
+        for chamada in st.session_state.chamadas:
+
+            if chamada["aluno"] != aluno_nome:
+                continue
+
+            if turma is not None and chamada["turma"] != turma:
+                continue
+
+            if disciplina is not None and chamada["disciplina"] != disciplina:
+                continue
+
+            total += 1
+
+        return total
+
+
+    # ========================================================
+    # FUNÇÃO PARA CALCULAR FREQUÊNCIA
+    # ========================================================
+
+    def calcular_frequencia_chamada(aluno_nome, turma=None, disciplina=None):
+
+        total = calcular_aulas_chamada(
+            aluno_nome,
+            turma,
+            disciplina
+        )
+
+        faltas = calcular_faltas_chamada(
+            aluno_nome,
+            turma,
+            disciplina
+        )
+
+        if total == 0:
+            return 0
+
+        presentes = total - faltas
+
+        return (presentes / total) * 100
+
+
+    # ========================================================
+    # 1️⃣ LANÇAR NOVA CHAMADA
+    # ========================================================
+
+    st.subheader("➕ Lançar chamada")
 
     if not st.session_state.alunos:
 
-        st.warning(
-            "Cadastre alunos primeiro."
-        )
+        st.warning("Cadastre pelo menos um aluno antes de lançar a chamada.")
 
     elif not st.session_state.disciplinas:
 
-        st.warning(
-            "Cadastre disciplinas primeiro."
-        )
-
-    elif not st.session_state.turmas:
-
-        st.warning(
-            "Cadastre turmas primeiro."
-        )
+        st.warning("Cadastre pelo menos uma disciplina antes de lançar a chamada.")
 
     else:
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         with col1:
 
             data_chamada = st.date_input(
-                "Data da aula",
-                value=date(2027, 1, 1),
+                "📅 Data da chamada",
+                value=date.today(),
                 min_value=date(2027, 1, 1),
-                max_value=date(2027, 12, 31),
-                key="data_chamada"
+                max_value=date(2027, 12, 31)
             )
 
         with col2:
 
+            turmas_disponiveis = sorted(
+                list(set(
+                    aluno["turma"]
+                    for aluno in st.session_state.alunos
+                ))
+            )
+
             turma_chamada = st.selectbox(
-                "Turma",
-                st.session_state.turmas,
-                key="turma_chamada"
+                "🏫 Turma",
+                turmas_disponiveis
             )
 
-        with col3:
 
-            disciplina_chamada = st.selectbox(
-                "Disciplina",
-                st.session_state.disciplinas,
-                key="disciplina_chamada"
-            )
+        disciplinas_disponiveis = st.session_state.disciplinas
 
-        st.divider()
+        disciplina_chamada = st.selectbox(
+            "📚 Disciplina",
+            disciplinas_disponiveis
+        )
 
-        alunos_turma = [
+
+        # ----------------------------------------------------
+        # ALUNOS DA TURMA
+        # ----------------------------------------------------
+
+        alunos_da_turma = [
             aluno["nome"]
             for aluno in st.session_state.alunos
             if aluno["turma"] == turma_chamada
         ]
 
-        if not alunos_turma:
+
+        if not alunos_da_turma:
 
             st.warning(
                 "Não existem alunos cadastrados nessa turma."
@@ -945,103 +1034,484 @@ with abas[4]:
 
         else:
 
-            st.subheader(
-                f"📋 Chamada — {turma_chamada}"
+            aluno_chamada = st.selectbox(
+                "👨‍🎓 Aluno",
+                sorted(alunos_da_turma)
             )
 
-            presencas = {}
 
-            for aluno in alunos_turma:
+            situacao_chamada = st.radio(
+                "Situação do aluno:",
+                ["Presente", "Falta"],
+                horizontal=True
+            )
 
-                presencas[aluno] = st.radio(
-                    f"**{aluno}**",
-                    [
-                        "Presente",
-                        "Falta"
-                    ],
-                    horizontal=True,
-                    key=f"presenca_{aluno}_{data_chamada}_{disciplina_chamada}"
-                )
 
             if st.button(
-                "💾 Salvar Chamada",
-                key="btn_salvar_chamada"
+                "💾 Registrar chamada",
+                type="primary"
             ):
 
-                for aluno, presenca in presencas.items():
+                data_texto = data_chamada.strftime("%d/%m/%Y")
 
-                    # Evita duplicar a chamada
-                    st.session_state.chamadas = [
-                        chamada
-                        for chamada in st.session_state.chamadas
-                        if not (
-                            chamada["aluno"] == aluno
-                            and chamada["turma"] == turma_chamada
-                            and chamada["disciplina"] == disciplina_chamada
-                            and chamada["data"] == str(data_chamada)
-                        )
-                    ]
 
-                    st.session_state.chamadas.append({
-                        "aluno": aluno,
-                        "turma": turma_chamada,
-                        "disciplina": disciplina_chamada,
-                        "data": str(data_chamada),
-                        "presenca": presenca
-                    })
+                # ------------------------------------------------
+                # VERIFICAR SE JÁ EXISTE CHAMADA
+                # ------------------------------------------------
+
+                chamada_existente = None
+                indice_existente = None
+
+                for i, chamada in enumerate(
+                    st.session_state.chamadas
+                ):
+
+                    if (
+                        chamada["aluno"] == aluno_chamada
+                        and chamada["turma"] == turma_chamada
+                        and chamada["disciplina"] == disciplina_chamada
+                        and chamada["data"] == data_texto
+                    ):
+
+                        chamada_existente = chamada
+                        indice_existente = i
+                        break
+
+
+                # ------------------------------------------------
+                # SE JÁ EXISTIR, ATUALIZA
+                # ------------------------------------------------
+
+                if chamada_existente is not None:
+
+                    st.session_state.chamadas[
+                        indice_existente
+                    ]["situacao"] = situacao_chamada
+
+                    st.success(
+                        "A chamada desse aluno nessa data já existia "
+                        "e foi atualizada corretamente."
+                    )
+
+                    st.rerun()
+
+
+                # ------------------------------------------------
+                # SE NÃO EXISTIR, CRIA
+                # ------------------------------------------------
+
+                nova_chamada = {
+
+                    "data": data_texto,
+
+                    "aluno": aluno_chamada,
+
+                    "turma": turma_chamada,
+
+                    "disciplina": disciplina_chamada,
+
+                    "situacao": situacao_chamada
+                }
+
+
+                st.session_state.chamadas.append(
+                    nova_chamada
+                )
+
 
                 st.success(
-                    "Chamada salva com sucesso!"
+                    f"Chamada registrada para {aluno_chamada}."
                 )
 
                 st.rerun()
 
-        st.divider()
 
-        st.subheader(
-            "📊 Resumo da frequência"
+    # ========================================================
+    # 2️⃣ CORRIGIR CHAMADA
+    # ========================================================
+
+    st.divider()
+
+    st.subheader("✏️ Corrigir chamada")
+
+    if not st.session_state.chamadas:
+
+        st.info(
+            "Nenhuma chamada foi registrada ainda."
         )
 
-        dados_frequencia = []
+    else:
 
-        for aluno in alunos_turma:
+        opcoes_chamadas = []
 
-            faltas = calcular_faltas(
-                aluno,
-                turma_chamada,
-                disciplina_chamada
+        for i, chamada in enumerate(
+            st.session_state.chamadas
+        ):
+
+            texto = (
+                f"{i} | "
+                f"{chamada['data']} | "
+                f"{chamada['aluno']} | "
+                f"{chamada['turma']} | "
+                f"{chamada['disciplina']} | "
+                f"{chamada['situacao']}"
             )
 
-            total = calcular_aulas(
-                aluno,
-                turma_chamada,
-                disciplina_chamada
+            opcoes_chamadas.append(texto)
+
+
+        chamada_selecionada = st.selectbox(
+            "Selecione a chamada que deseja corrigir:",
+            opcoes_chamadas,
+            key="chamada_para_editar"
+        )
+
+
+        indice_edicao = int(
+            chamada_selecionada.split(" | ")[0]
+        )
+
+
+        chamada_atual = st.session_state.chamadas[
+            indice_edicao
+        ]
+
+
+        st.write(
+            f"**Aluno:** {chamada_atual['aluno']}"
+        )
+
+        st.write(
+            f"**Data:** {chamada_atual['data']}"
+        )
+
+        st.write(
+            f"**Turma:** {chamada_atual['turma']}"
+        )
+
+        st.write(
+            f"**Disciplina:** {chamada_atual['disciplina']}"
+        )
+
+        st.write(
+            f"**Situação atual:** {chamada_atual['situacao']}"
+        )
+
+
+        nova_situacao = st.radio(
+            "Nova situação:",
+            ["Presente", "Falta"],
+            index=(
+                0
+                if chamada_atual["situacao"] == "Presente"
+                else 1
+            ),
+            horizontal=True,
+            key="nova_situacao_edicao"
+        )
+
+
+        if st.button(
+            "💾 Salvar correção",
+            key="salvar_correcao"
+        ):
+
+            st.session_state.chamadas[
+                indice_edicao
+            ]["situacao"] = nova_situacao
+
+
+            st.success(
+                "Chamada corrigida com sucesso!"
             )
 
-            frequencia = calcular_frequencia(
-                aluno,
-                turma_chamada,
-                disciplina_chamada
+            st.rerun()
+
+
+    # ========================================================
+    # 3️⃣ EXCLUIR CHAMADA
+    # ========================================================
+
+    st.divider()
+
+    st.subheader("🗑️ Excluir chamada")
+
+    if not st.session_state.chamadas:
+
+        st.info(
+            "Não existem chamadas para excluir."
+        )
+
+    else:
+
+        opcoes_exclusao = []
+
+        for i, chamada in enumerate(
+            st.session_state.chamadas
+        ):
+
+            texto = (
+                f"{i} | "
+                f"{chamada['data']} | "
+                f"{chamada['aluno']} | "
+                f"{chamada['turma']} | "
+                f"{chamada['disciplina']} | "
+                f"{chamada['situacao']}"
             )
 
-            dados_frequencia.append({
-                "Aluno": aluno,
-                "Aulas": total,
+            opcoes_exclusao.append(texto)
+
+
+        chamada_excluir = st.selectbox(
+            "Selecione a chamada que deseja excluir:",
+            opcoes_exclusao,
+            key="chamada_para_excluir"
+        )
+
+
+        indice_exclusao = int(
+            chamada_excluir.split(" | ")[0]
+        )
+
+
+        chamada_selecionada_exclusao = (
+            st.session_state.chamadas[
+                indice_exclusao
+            ]
+        )
+
+
+        st.warning(
+            "A chamada será enviada para a Lixeira. "
+            "Ela poderá ser restaurada posteriormente."
+        )
+
+
+        if st.button(
+            "🗑️ Enviar chamada para a Lixeira",
+            key="enviar_chamada_lixeira"
+        ):
+
+            chamada_removida = (
+                st.session_state.chamadas.pop(
+                    indice_exclusao
+                )
+            )
+
+
+            st.session_state.chamadas_lixeira.append(
+                chamada_removida
+            )
+
+
+            st.success(
+                "Chamada enviada para a Lixeira."
+            )
+
+            st.rerun()
+
+
+    # ========================================================
+    # 4️⃣ CONSULTAR CHAMADAS
+    # ========================================================
+
+    st.divider()
+
+    st.subheader("📋 Chamadas registradas")
+
+    if st.session_state.chamadas:
+
+        df_chamadas = pd.DataFrame(
+            st.session_state.chamadas
+        )
+
+
+        # ----------------------------------------------------
+        # FILTROS
+        # ----------------------------------------------------
+
+        col1, col2, col3 = st.columns(3)
+
+
+        with col1:
+
+            filtro_turma = st.selectbox(
+                "Filtrar por turma:",
+                ["Todas"] + sorted(
+                    list(
+                        set(
+                            c["turma"]
+                            for c in st.session_state.chamadas
+                        )
+                    )
+                ),
+                key="filtro_turma_chamada"
+            )
+
+
+        with col2:
+
+            filtro_disciplina = st.selectbox(
+                "Filtrar por disciplina:",
+                ["Todas"] + sorted(
+                    list(
+                        set(
+                            c["disciplina"]
+                            for c in st.session_state.chamadas
+                        )
+                    )
+                ),
+                key="filtro_disciplina_chamada"
+            )
+
+
+        with col3:
+
+            filtro_aluno = st.selectbox(
+                "Filtrar por aluno:",
+                ["Todos"] + sorted(
+                    list(
+                        set(
+                            c["aluno"]
+                            for c in st.session_state.chamadas
+                        )
+                    )
+                ),
+                key="filtro_aluno_chamada"
+            )
+
+
+        df_filtrado = df_chamadas.copy()
+
+
+        if filtro_turma != "Todas":
+
+            df_filtrado = df_filtrado[
+                df_filtrado["turma"] == filtro_turma
+            ]
+
+
+        if filtro_disciplina != "Todas":
+
+            df_filtrado = df_filtrado[
+                df_filtrado["disciplina"]
+                == filtro_disciplina
+            ]
+
+
+        if filtro_aluno != "Todos":
+
+            df_filtrado = df_filtrado[
+                df_filtrado["aluno"]
+                == filtro_aluno
+            ]
+
+
+        st.dataframe(
+            df_filtrado,
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+    else:
+
+        st.info(
+            "Nenhuma chamada registrada."
+        )
+
+
+    # ========================================================
+    # 5️⃣ RESUMO DE FREQUÊNCIA
+    # ========================================================
+
+    st.divider()
+
+    st.subheader("📊 Resumo de frequência")
+
+
+    if st.session_state.alunos:
+
+        resumo = []
+
+
+        for aluno in st.session_state.alunos:
+
+            nome = aluno["nome"]
+            turma = aluno["turma"]
+
+
+            total_aulas = calcular_aulas_chamada(
+                nome,
+                turma
+            )
+
+
+            faltas = calcular_faltas_chamada(
+                nome,
+                turma
+            )
+
+
+            frequencia = calcular_frequencia_chamada(
+                nome,
+                turma
+            )
+
+
+            resumo.append({
+
+                "Aluno": nome,
+
+                "Turma": turma,
+
+                "Total de aulas": total_aulas,
+
                 "Faltas": faltas,
-                "Frequência (%)": frequencia
+
+                "Presenças": total_aulas - faltas,
+
+                "Frequência (%)": round(
+                    frequencia,
+                    2
+                )
             })
 
-        if dados_frequencia:
 
-            st.dataframe(
-                pd.DataFrame(
-                    dados_frequencia
-                ),
-                use_container_width=True,
-                hide_index=True
-            )
+        df_resumo = pd.DataFrame(
+            resumo
+        )
 
 
+        st.dataframe(
+            df_resumo,
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+        # ----------------------------------------------------
+        # DOWNLOAD
+        # ----------------------------------------------------
+
+        csv_chamada = df_resumo.to_csv(
+            index=False
+        ).encode("utf-8")
+
+
+        st.download_button(
+            "⬇️ Baixar resumo de frequência",
+            data=csv_chamada,
+            file_name="frequencia_2027.csv",
+            mime="text/csv"
+        )
+
+
+    else:
+
+        st.info(
+            "Cadastre alunos para visualizar a frequência."
+        )
 # ============================================================
 # ABA 6 - RELATÓRIOS
 # ============================================================
