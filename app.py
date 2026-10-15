@@ -44,7 +44,7 @@ def calcular_media(n1, n2, n3, n4):
 
 
 def situacao(media):
-    if media >= 7:
+    if media >= 6:
         return "Aprovado"
     elif media >= 4:
         return "Recuperação"
