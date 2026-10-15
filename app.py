@@ -15,10 +15,25 @@ st.set_page_config(
 # ============================================================
 # BANCO DE DADOS
 # ============================================================
-
+if "chamadas" not in st.session_state:
+    st.session_state.chamadas = []
 if "turmas" not in st.session_state:
     st.session_state.turmas = []
+# ============================================================
+# LIXEIRAS
+# ============================================================
 
+if "professores_lixeira" not in st.session_state:
+    st.session_state.professores_lixeira = []
+
+if "alunos_lixeira" not in st.session_state:
+    st.session_state.alunos_lixeira = []
+
+if "notas_lixeira" not in st.session_state:
+    st.session_state.notas_lixeira = []
+
+if "chamadas_lixeira" not in st.session_state:
+    st.session_state.chamadas_lixeira = []
 if "disciplinas" not in st.session_state:
     st.session_state.disciplinas = []
 
