@@ -7,7 +7,7 @@ import streamlit as st
 # ============================================================
 
 st.set_page_config(
-    page_title="Sistema Escolar 2028", page_icon="🏫", layout="wide"
+    page_title="Sistema Escolar 2027", page_icon="🏫", layout="wide"
 )
 
 # ============================================================
@@ -97,7 +97,7 @@ def calcular_frequencia(aluno, turma, disciplina=None):
 # TÍTULO
 # ============================================================
 
-st.title("🏫 SISTEMA DE GESTÃO ESCOLAR - 2027")
+st.title("🏫 SISTEMA DE GESTÃO ESCOLAR - 2028")
 
 st.markdown("### Cadastro de professores, alunos, notas e frequência")
 
