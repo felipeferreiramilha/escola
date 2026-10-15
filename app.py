@@ -97,7 +97,7 @@ def calcular_frequencia(aluno, turma, disciplina=None):
 # TÍTULO
 # ============================================================
 
-st.title("🏫 SISTEMA DE GESTÃO ESCOLAR - 2028")
+st.title("🏫 Professor On-line")
 
 st.markdown("### Cadastro de professores, alunos, notas e frequência")
 
