@@ -1161,3 +1161,7 @@ st.caption(
     "🏫 Sistema Escolar • Alunos • Professores • Notas • Frequência • Chamada •"
     " Planos de Aula"
 )
+
+    
+
+    
